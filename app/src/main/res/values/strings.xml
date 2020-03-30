@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">DocumentScannerAndroid</string>
+    <string name="capture_image">Capture Image</string>
+</resources>
