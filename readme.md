@@ -55,7 +55,6 @@ On above Android 9.0 there is magnifier to help user to see zoomed image to crop
 ## Thanks  
   
 * Thanks RX library to improve this project.  
-* Thanks OpenCV for this awesome library. - https://opencv.org/  
-and  
+* Thanks OpenCV for this awesome library. - https://opencv.org/
 * Inspiration from *aashari*. Thanks him for his source codes. - https://github.com/aashari/android-opencv-camera-scanner  
   
