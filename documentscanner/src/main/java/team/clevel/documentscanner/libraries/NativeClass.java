@@ -78,70 +78,12 @@ public class NativeClass {
     //public native float[] getPoints(Bitmap bitmap);
     // Harsh Code
     private List<MatOfPoint2f> getPoints(Mat src) {
-       /* List<MatOfPoint> contours = new ArrayList<>();
-        List<MatOfPoint2f> rectangles = new ArrayList<>();
-        Bitmap bitmap = Bitmap.createBitmap((int) src.size().width, (int) src.size().height, Bitmap.Config.ARGB_8888);
-        int srcArea = src.rows() * src.cols();
-        Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(9.0, 9.0));
-        Size size = new Size(src.size().width, src.size().height);
-        Mat grayImage = new Mat(size, CvType.CV_8UC4);
-        Mat cannedImage = new Mat(size, CvType.CV_8UC1);
-        Mat dilate = new Mat(size, CvType.CV_8UC1);
-        Imgproc.cvtColor(src, grayImage, Imgproc.COLOR_RGBA2GRAY);
-        Imgproc.GaussianBlur(grayImage, grayImage, new Size(5.0, 5.0), 0.0);
-        Imgproc.threshold(grayImage, grayImage, 180.0, 255.0, Imgproc.THRESH_BINARY);
-        //Imgproc.threshold(grayImage, grayImage, 20.0, 255.0, Imgproc.THRESH_TRIANGLE);
-        //Imgproc.adaptiveThreshold(grayImage, grayImage, 255.0, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 71, 7.0);
-        Imgproc.Canny(grayImage, cannedImage, 255.0 / 3.0, 255.0);
-        Imgproc.dilate(cannedImage, dilate, kernel);
-        Utils.matToBitmap(dilate, bitmap);
-        Mat hierarchy = new Mat();
-        Imgproc.findContours(
-                dilate,
-                contours,
-                hierarchy,
-                Imgproc.RETR_TREE,
-                Imgproc.CHAIN_APPROX_SIMPLE
-        );
-        if (contours.size() >= 5)
-            contours = contours.subList(0,5);
-        for (MatOfPoint contour : contours) {
-            MatOfPoint2f contourFloat = MathUtils.toMatOfPointFloat(contour);
-            double arcLen = Imgproc.arcLength(contourFloat, true) * 0.02;
-
-            // Approximate polygonal curves.
-            MatOfPoint2f approx = new MatOfPoint2f();
-            Imgproc.approxPolyDP(contourFloat, approx, arcLen, true);
-
-            List<Point> approxPoints = Arrays.asList(approx.toArray());
-            *//*rectangles.add(approx);
-            break;*//*
-            if (approxPoints.size() == 4) {
-                if(isRectangle(approx,srcArea)){
-                    rectangles.add(approx);
-                    break;
-                }
-            }
-        }
-        List<MatOfPoint> rect = new ArrayList<>();
-        for (MatOfPoint2f item : rectangles) {
-            rect.add(MathUtils.toMatOfPointInt(item));
-        }
-        Imgproc.drawContours(src, rect, -1, new Scalar(255, 0, 0, 255), 5);
-        Imgproc.drawContours(src, contours, -1, new Scalar(0, 0, 255, 255), 3);
-        //Imgproc.drawContours(src,tempContours,-1,new Scalar(255,0,0,255),1);
-        Utils.matToBitmap(src, bitmap);
-        hierarchy.release();
-        grayImage.release();
-        cannedImage.release();
-        kernel.release();
-        dilate.release();
-        return rectangles;*/
         // Blur the image to filter out the noise.
         Bitmap bitmap = Bitmap.createBitmap((int) src.size().width, (int) src.size().height, Bitmap.Config.ARGB_8888);
         Mat blurred = new Mat();
+        //bitmap = ImageUtils.matToBitmap(src);
         Imgproc.medianBlur(src, blurred, 9);
-
+        //bitmap = ImageUtils.matToBitmap(blurred);
         // Set up images to use.
         Mat gray0 = new Mat(blurred.size(), CvType.CV_8U);
         Mat gray = new Mat();
@@ -172,9 +114,11 @@ public class NativeClass {
 
                     // Dilate Canny output to remove potential holes between edge segments.
                     Imgproc.dilate(gray, gray, Mat.ones(new Size(3, 3), 0));
+                    //bitmap = ImageUtils.matToBitmap(gray);
                 } else {
                     int threshold = (l + 1) * 255 / THRESHOLD_LEVEL;
                     Imgproc.threshold(gray0, gray, threshold, 255, Imgproc.THRESH_BINARY);
+                    //bitmap = ImageUtils.matToBitmap(gray);
                 }
                 // Find contours and store them all as a list.
                 Imgproc.findContours(gray, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
