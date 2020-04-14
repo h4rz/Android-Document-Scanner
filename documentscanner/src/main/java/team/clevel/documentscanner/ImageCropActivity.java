@@ -386,8 +386,8 @@ public class ImageCropActivity extends Activity {
 
     private SparseArray<PointF> getOutlinePoints(Bitmap tempBitmap) {
         // set minWidth & minHeight to 0 to get proper outline points
-        float minWidth = (float) (0.15 * tempBitmap.getWidth());
-        float minHeight = (float) (0.15 * tempBitmap.getHeight());
+        float minWidth = (float) (0.10 * tempBitmap.getWidth());
+        float minHeight = (float) (0.10 * tempBitmap.getHeight());
         float maxWidth = tempBitmap.getWidth() - minWidth;
         float maxHeight = tempBitmap.getHeight() - minHeight;
         SparseArray<PointF> outlinePoints = new SparseArray<>();
