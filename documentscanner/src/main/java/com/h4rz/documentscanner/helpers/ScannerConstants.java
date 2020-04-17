@@ -7,7 +7,7 @@
  *
  */
 
-package team.clevel.documentscanner.helpers;
+package com.h4rz.documentscanner.helpers;
 
 import android.graphics.Bitmap;
 

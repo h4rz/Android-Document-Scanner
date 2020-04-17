@@ -7,10 +7,11 @@
  *
  */
 
-package team.clevel.documentscanner.helpers;
+package com.h4rz.documentscanner.helpers;
 
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
+
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;

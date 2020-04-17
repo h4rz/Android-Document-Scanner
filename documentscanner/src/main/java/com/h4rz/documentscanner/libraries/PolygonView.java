@@ -7,7 +7,7 @@
  *
  */
 
-package team.clevel.documentscanner.libraries;
+package com.h4rz.documentscanner.libraries;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -23,10 +23,10 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Magnifier;
 
+import com.h4rz.documentscanner.R;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import team.clevel.documentscanner.R;
 
 /**
  * Created by jhansi on 28/03/15.

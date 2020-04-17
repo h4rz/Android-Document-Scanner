@@ -7,7 +7,7 @@
  *
  */
 
-package team.clevel.documentscanner.libraries;
+package com.h4rz.documentscanner.libraries;
 
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;

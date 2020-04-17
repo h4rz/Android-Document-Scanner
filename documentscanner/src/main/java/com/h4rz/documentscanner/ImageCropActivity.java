@@ -7,17 +7,14 @@
  *
  */
 
-package team.clevel.documentscanner;
+package com.h4rz.documentscanner;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
 import android.graphics.PointF;
-import android.graphics.PorterDuff;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
@@ -34,6 +31,11 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.h4rz.documentscanner.helpers.ImageUtils;
+import com.h4rz.documentscanner.helpers.ScannerConstants;
+import com.h4rz.documentscanner.libraries.NativeClass;
+import com.h4rz.documentscanner.libraries.PolygonView;
+
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 
@@ -48,10 +50,6 @@ import java.util.List;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import team.clevel.documentscanner.helpers.ImageUtils;
-import team.clevel.documentscanner.helpers.ScannerConstants;
-import team.clevel.documentscanner.libraries.NativeClass;
-import team.clevel.documentscanner.libraries.PolygonView;
 
 public class ImageCropActivity extends Activity {
 

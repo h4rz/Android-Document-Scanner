@@ -7,11 +7,14 @@
  *
  */
 
-package team.clevel.documentscanner.libraries;
+package com.h4rz.documentscanner.libraries;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.util.Log;
+
+import com.h4rz.documentscanner.helpers.ImageUtils;
+import com.h4rz.documentscanner.helpers.MathUtils;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
@@ -33,9 +36,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
-import team.clevel.documentscanner.helpers.ImageUtils;
-import team.clevel.documentscanner.helpers.MathUtils;
 
 public class NativeClass {
 
@@ -147,8 +147,12 @@ public class NativeClass {
         return getRectanglesFromTextDetection(src);
     }
 
-    private List<MatOfPoint2f> getRectanglesFromTextDetection(Mat src) {
+    private List<MatOfPoint2f> getRectanglesFromTextDetection(Mat originalMat) {
         Log.i("***** NATIVE CLASS - ", "Detecting from text");
+        Mat src = originalMat;
+        Bitmap enhancedBitmap = ImageUtils.matToBitmap(src);
+        enhancedBitmap = applyMagicFilter(enhancedBitmap);
+        src = ImageUtils.bitmapToMat(enhancedBitmap);
         Scalar CONTOUR_COLOR = new Scalar(255, 0, 0, 255);
         Mat mGrey = new Mat(src.size(), CvType.CV_8UC4);
         Imgproc.cvtColor(src, mGrey, Imgproc.COLOR_RGBA2GRAY);
@@ -243,7 +247,7 @@ public class NativeClass {
         List<Point> points = new ArrayList<>();
         int minX = newRectangle.x;
         int minY = newRectangle.y;
-        int maxX = newRectangle.x + newRectangle.width;
+        int maxX = newRectangle.x + (newRectangle.width + 100);
         int maxY = newRectangle.y + newRectangle.height;
         if (maxX > mRgba.width())
             maxX = mRgba.width();
@@ -278,123 +282,6 @@ public class NativeClass {
         return rectangles;
     }
 
-    // CodeSquad's Code
-    /*private List<MatOfPoint2f> getPoints(Mat src) {
-        List<MatOfPoint> contours = new ArrayList<>();
-        List<MatOfPoint2f> rectangles = new ArrayList<>();
-        Mat grayImage;
-        Mat cannedImage;
-        Mat resizedImage;
-
-        Size size = new Size(src.size().width, src.size().height);
-
-        resizedImage = new Mat(size, CvType.CV_8UC4);
-        grayImage = new Mat(size, CvType.CV_8UC4);
-        cannedImage = new Mat(size, CvType.CV_8UC1);
-
-        Imgproc.resize(src, resizedImage, size);
-        Imgproc.cvtColor(resizedImage, grayImage, Imgproc.COLOR_RGBA2GRAY, 4);
-        //Imgproc.equalizeHist(grayImage, grayImage);
-        //CLAHE clahe = Imgproc.createCLAHE(2.0, new Size(8, 8));
-        //clahe.apply(grayImage, grayImage);
-        Imgproc.applyColorMap(grayImage, grayImage, Imgproc.COLORMAP_HSV);
-        Imgproc.GaussianBlur(grayImage, grayImage, new Size(5, 5), 0);
-        Imgproc.Canny(grayImage, cannedImage, 80, 100, 3, false);
-        //Imgproc.Canny(grayImage, cannedImage, 75, 200, 3, false);
-        Mat hierarchy = new Mat();
-
-        Imgproc.findContours(cannedImage, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
-
-        hierarchy.release();
-
-        Collections.sort(contours, new Comparator<MatOfPoint>() {
-
-            @Override
-            public int compare(MatOfPoint lhs, MatOfPoint rhs) {
-                return Double.compare(Imgproc.contourArea(rhs), Imgproc.contourArea(lhs));
-            }
-        });
-
-        resizedImage.release();
-        grayImage.release();
-        cannedImage.release();
-
-        for (MatOfPoint contour : contours) {
-            MatOfPoint2f contourFloat = MathUtils.toMatOfPointFloat(contour);
-            double arcLen = Imgproc.arcLength(contourFloat, true) * 0.02;
-
-            // Approximate polygonal curves.
-             MatOfPoint2f approx = new MatOfPoint2f();
-            Imgproc.approxPolyDP(contourFloat, approx, arcLen, true);
-
-            Point[] approxPoints = sortPoints(approx.toArray());
-            if (insideArea(approxPoints, size)) {
-                //if(isRectangle(approx,srcArea))
-                rectangles.add(approx);
-            }
-        }
-        return rectangles;
-    }
-
-    private boolean insideArea(Point[] rp, Size size) {
-
-        int width = Double.valueOf(size.width).intValue();
-        int height = Double.valueOf(size.height).intValue();
-
-        int minimumSize = width / 10;
-
-        boolean isANormalShape = rp[0].x != rp[1].x && rp[1].y != rp[0].y && rp[2].y != rp[3].y && rp[3].x != rp[2].x;
-        boolean isBigEnough = ((rp[1].x - rp[0].x >= minimumSize) && (rp[2].x - rp[3].x >= minimumSize)
-                && (rp[3].y - rp[0].y >= minimumSize) && (rp[2].y - rp[1].y >= minimumSize));
-
-        double leftOffset = rp[0].x - rp[3].x;
-        double rightOffset = rp[1].x - rp[2].x;
-        double bottomOffset = rp[0].y - rp[1].y;
-        double topOffset = rp[2].y - rp[3].y;
-
-        boolean isAnActualRectangle = ((leftOffset <= minimumSize && leftOffset >= -minimumSize)
-                && (rightOffset <= minimumSize && rightOffset >= -minimumSize)
-                && (bottomOffset <= minimumSize && bottomOffset >= -minimumSize)
-                && (topOffset <= minimumSize && topOffset >= -minimumSize));
-
-        return isANormalShape && isAnActualRectangle && isBigEnough;
-    }
-
-    private Point[] sortPoints(Point[] src) {
-
-        ArrayList<Point> srcPoints = new ArrayList<>(Arrays.asList(src));
-
-        Point[] result = { null, null, null, null };
-
-        Comparator<Point> sumComparator = new Comparator<Point>() {
-            @Override
-            public int compare(Point lhs, Point rhs) {
-                return Double.compare(lhs.y + lhs.x, rhs.y + rhs.x);
-            }
-        };
-
-        Comparator<Point> diffComparator = new Comparator<Point>() {
-
-            @Override
-            public int compare(Point lhs, Point rhs) {
-                return Double.compare(lhs.y - lhs.x, rhs.y - rhs.x);
-            }
-        };
-
-        // top-left corner = minimal sum
-        result[0] = Collections.min(srcPoints, sumComparator);
-
-        // bottom-right corner = maximal sum
-        result[2] = Collections.max(srcPoints, sumComparator);
-
-        // top-right corner = minimal difference
-        result[1] = Collections.min(srcPoints, diffComparator);
-
-        // bottom-left corner = maximal difference
-        result[3] = Collections.max(srcPoints, diffComparator);
-
-        return result;
-    }*/
 
     private boolean isRectangle(MatOfPoint2f polygon, int srcArea) {
         MatOfPoint polygonInt = MathUtils.toMatOfPointInt(polygon);

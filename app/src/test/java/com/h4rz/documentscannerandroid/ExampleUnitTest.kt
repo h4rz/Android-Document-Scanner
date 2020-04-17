@@ -1,4 +1,4 @@
-package team.clevel.documentscannerandroid
+package com.h4rz.documentscannerandroid
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

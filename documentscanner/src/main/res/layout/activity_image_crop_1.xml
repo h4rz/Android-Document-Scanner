@@ -46,7 +46,7 @@
                     android:adjustViewBounds="true" />
             </FrameLayout>
 
-            <team.clevel.documentscanner.libraries.PolygonView
+            <com.h4rz.documentscanner.libraries.PolygonView
                 android:id="@+id/polygonView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

@@ -1,4 +1,4 @@
-package team.clevel.documentscannerandroid
+package com.h4rz.documentscannerandroid
 
 import android.Manifest
 import android.app.Activity
@@ -17,9 +17,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.h4rz.documentscanner.ImageCropActivity
+import com.h4rz.documentscanner.helpers.ScannerConstants
 import com.kotlinpermissions.KotlinPermissions
-import team.clevel.documentscanner.ImageCropActivity
-import team.clevel.documentscanner.helpers.ScannerConstants
 import java.io.File
 import java.io.IOException
 

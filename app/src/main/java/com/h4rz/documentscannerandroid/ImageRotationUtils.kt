@@ -1,4 +1,4 @@
-package team.clevel.documentscannerandroid
+package com.h4rz.documentscannerandroid
 
 import android.annotation.SuppressLint
 import android.content.Context
