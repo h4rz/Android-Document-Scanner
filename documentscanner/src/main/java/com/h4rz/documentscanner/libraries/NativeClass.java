@@ -144,14 +144,14 @@ public class NativeClass {
 
         if (rectangles.size() != 0)
             return rectangles;
-        return getRectanglesFromTextDetection(src);
+        return getRectanglesFromOpenCVTextDetection(src);
     }
 
-    private List<MatOfPoint2f> getRectanglesFromTextDetection(Mat originalMat) {
+    private List<MatOfPoint2f> getRectanglesFromOpenCVTextDetection(Mat originalMat) {
         Log.i("***** NATIVE CLASS - ", "Detecting from text");
         Mat src = originalMat;
         Bitmap enhancedBitmap = ImageUtils.matToBitmap(src);
-        enhancedBitmap = applyMagicFilter(enhancedBitmap);
+        //enhancedBitmap = applyMagicFilter(enhancedBitmap);
         src = ImageUtils.bitmapToMat(enhancedBitmap);
         Scalar CONTOUR_COLOR = new Scalar(255, 0, 0, 255);
         Mat mGrey = new Mat(src.size(), CvType.CV_8UC4);
@@ -221,38 +221,56 @@ public class NativeClass {
                 usefulContours.add(contour2.get(ind));
         }
 
-        Rect firstRect = new Rect();
-        Rect lastRect = new Rect();
+        Rect lastRect = Imgproc.boundingRect(usefulContours.get(0));
+        Rect firstRect = Imgproc.boundingRect(usefulContours.get(usefulContours.size() - 1));
 
+        int largerWidth = firstRect.width;
 
-        for (int ind = 0; ind < usefulContours.size(); ind++) {
-            rectan3 = Imgproc.boundingRect(contour2.get(ind));
-            if (ind == 0) {
-                lastRect = rectan3;
-            } else if (ind == usefulContours.size() - 1) {
-                firstRect = rectan3;
-            }
-            //Imgproc.rectangle(mRgba, rectan3.br(), rectan3.tl(), CONTOUR_COLOR);
-        }
+        if (firstRect.width < lastRect.width)
+            largerWidth = lastRect.width;
 
-        if (firstRect.width > lastRect.width)
-            lastRect.width = firstRect.width;
-        else
-            firstRect.width = lastRect.width;
+       /* Imgproc.rectangle(mRgba, lastRect.br(), lastRect.tl(), CONTOUR_COLOR);
+
+        enhancedBitmap = ImageUtils.matToBitmap(mRgba);
+
+        Imgproc.rectangle(mRgba, firstRect.br(), firstRect.tl(), CONTOUR_COLOR);
+
+        enhancedBitmap = ImageUtils.matToBitmap(mRgba);*/
 
         Rect newRectangle = new Rect(lastRect.br(), firstRect.tl());
+        //newRectangle.width = largerWidth;
 
-        Imgproc.rectangle(mRgba, newRectangle.br(), newRectangle.tl(), CONTOUR_COLOR);
+        //Imgproc.rectangle(mRgba, newRectangle.br(), newRectangle.tl(), CONTOUR_COLOR);
+
+        enhancedBitmap = ImageUtils.matToBitmap(mRgba);
+
+        double percentage = 0.5;
+        int minWidth = (int) (mGrey.width() - mGrey.width() * percentage);
+        if (minWidth < largerWidth)
+            minWidth = largerWidth;
+        int minHeight = (int) (mGrey.height() - mGrey.height() * percentage);
+        if (newRectangle.width < minWidth)
+            newRectangle.width = minWidth;
+        if (newRectangle.height < minHeight) {
+            Point topLeft = newRectangle.tl();
+            Point bottomRight = newRectangle.br();
+            int heightDistance = (int) (topLeft.y - bottomRight.y);
+            if (heightDistance >= -200 && heightDistance < 0) {
+                topLeft.y = Math.abs(minHeight - topLeft.y);
+                newRectangle.y = (int) topLeft.y;
+            }
+            newRectangle.height = minHeight;
+        }
 
         List<Point> points = new ArrayList<>();
         int minX = newRectangle.x;
         int minY = newRectangle.y;
-        int maxX = newRectangle.x + (newRectangle.width + 100);
+        int maxX = newRectangle.x + newRectangle.width;
         int maxY = newRectangle.y + newRectangle.height;
         if (maxX > mRgba.width())
             maxX = mRgba.width();
         if (maxY > mRgba.height())
-            maxX = mRgba.height();
+            maxY = mRgba.height();
         if (minX < 0)
             minX = 0;
         if (minY < 0)
@@ -266,6 +284,12 @@ public class NativeClass {
         points.add(bottomLeft);
         points.add(bottomRight);
 
+        newRectangle = new Rect(bottomRight, topLeft);
+
+       /* Imgproc.rectangle(mRgba, newRectangle.br(), newRectangle.tl(), CONTOUR_COLOR);
+
+        enhancedBitmap = ImageUtils.matToBitmap(mRgba);*/
+
         MatOfPoint temp = new MatOfPoint();
         temp.fromList(points);
 
@@ -276,7 +300,7 @@ public class NativeClass {
         MatOfPoint2f approx = new MatOfPoint2f();
         Imgproc.approxPolyDP(contourFloat, approx, arcLen, true);
 
-        //if (isRectangle(approx, srcArea)) {
+        //if (isRectangle(approx, (int) (imgsize * 0.5))) {
         rectangles.add(approx);
         //}
         return rectangles;
@@ -364,4 +388,5 @@ public class NativeClass {
         }*/
         return bmap;
     }
+
 }
