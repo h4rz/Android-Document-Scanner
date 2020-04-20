@@ -20,7 +20,7 @@
         android:label="@string/app_name"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
-            android:name="com.h4rz.documentscanner.ImageCropActivity"
+            android:name=".ImageCropActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
     </application>
