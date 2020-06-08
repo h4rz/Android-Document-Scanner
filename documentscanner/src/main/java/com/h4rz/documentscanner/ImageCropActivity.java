@@ -245,14 +245,17 @@ public class ImageCropActivity extends Activity {
     };
 
     private View.OnClickListener btnSave = v -> {
-        String location = saveToInternalStorage(ScannerConstants.selectedImageBitmap);
-        Log.i("****Image Stored At-", location);
-        Toast.makeText(this, "Image Stored At -" + location, Toast.LENGTH_SHORT).show();
+        ScannerConstants.finalImagePath = saveToInternalStorage(ScannerConstants.selectedImageBitmap);
+        Log.i("****Image Stored At-", ScannerConstants.finalImagePath);
+        Toast.makeText(this, "Image Stored At -" + ScannerConstants.finalImagePath, Toast.LENGTH_SHORT).show();
         setResult(RESULT_OK);
         finish();
     };
 
-    private View.OnClickListener btnCloseClick = v -> finish();
+    private View.OnClickListener btnCloseClick = v -> {
+        setResult(RESULT_CANCELED);
+        finish();
+    };
 
     private Bitmap applyMagicfilter(Bitmap selectedImageBitmap) {
         if (!isInverted) {
