@@ -32,9 +32,9 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.h4rz.documentscanner.helpers.ImageUtils;
-import com.h4rz.documentscanner.helpers.ScannerConstants;
 import com.h4rz.documentscanner.libraries.NativeClass;
 import com.h4rz.documentscanner.libraries.PolygonView;
+import com.h4rz.documentscannerandroid.ScannerConstants;
 
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;

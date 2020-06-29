@@ -1,13 +1,4 @@
-/*
- * *
- *  * Created by Muhammet Ali YÜCE on 3/5/19 4:26 PM
- *  * on Github: /mayuce
- *  * Copyright (c) 2019 . All rights reserved.
- *  * Last modified 3/5/19 3:57 PM
- *
- */
-
-package com.h4rz.documentscanner.helpers;
+package com.h4rz.documentscannerandroid;
 
 import android.graphics.Bitmap;
 

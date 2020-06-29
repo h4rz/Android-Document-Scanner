@@ -17,8 +17,11 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.h4rz.documentscanner.ImageCropActivity
-import com.h4rz.documentscanner.helpers.ScannerConstants
+import com.google.android.play.core.splitinstall.SplitInstallManager
+import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
+import com.google.android.play.core.splitinstall.SplitInstallRequest
+import com.google.android.play.core.splitinstall.SplitInstallStateUpdatedListener
+import com.google.android.play.core.splitinstall.model.SplitInstallSessionStatus
 import com.kotlinpermissions.KotlinPermissions
 import java.io.File
 import java.io.IOException
@@ -27,6 +30,8 @@ class MainActivity : AppCompatActivity() {
     lateinit var btnPick: Button
     lateinit var imgBitmap: ImageView
     lateinit var mCurrentPhotoPath: String
+    private lateinit var manager: SplitInstallManager
+    var mySessionId = 0
 
     val GALLERY_INTENT_REQUEST_CODE = 1111
     val CAMERA_INTENT_REQUEST_CODE = 1231
@@ -41,21 +46,25 @@ class MainActivity : AppCompatActivity() {
             try {
                 Log.e("IamgePath", "" + selectedImagePath)
                 btimap = handleSamplingAndRotationBitmap(this, selectedImage)
-                ScannerConstants.selectedImageBitmap=btimap
-                startActivityForResult(
-                    Intent(this, ImageCropActivity::class.java),
-                    ImageCropActivity_INTENT_REQUEST_CODE
+                ScannerConstants.selectedImageBitmap = btimap
+                val intent = Intent()
+                intent.setClassName(
+                    BuildConfig.APPLICATION_ID,
+                    "com.h4rz.documentscanner.ImageCropActivity"
                 )
+                startActivityForResult(intent, ImageCropActivity_INTENT_REQUEST_CODE)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         } else if (requestCode == CAMERA_INTENT_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             val uri = Uri.parse(mCurrentPhotoPath)
             ScannerConstants.selectedImageBitmap = handleSamplingAndRotationBitmap(this, uri)
-            startActivityForResult(
-                Intent(this, ImageCropActivity::class.java),
-                ImageCropActivity_INTENT_REQUEST_CODE
+            val intent = Intent()
+            intent.setClassName(
+                BuildConfig.APPLICATION_ID,
+                "com.h4rz.documentscanner.ImageCropActivity"
             )
+            startActivityForResult(intent, ImageCropActivity_INTENT_REQUEST_CODE)
             //startActivity(Intent(MainActivity@this, ImageCropActivity::class.java))
         } else if (requestCode == ImageCropActivity_INTENT_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             if (ScannerConstants.selectedImageBitmap != null) {
@@ -70,23 +79,94 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        manager = SplitInstallManagerFactory.create(this)
         btnPick = findViewById(R.id.btnPick)
         imgBitmap = findViewById(R.id.imgBitmap)
         mCurrentPhotoPath = ""
-        askPermission()
+        //askPermission()
+        installModule()
     }
 
-    fun askPermission() {
+    private fun installModule() {
+        val splitInstallManager = SplitInstallManagerFactory.create(this)
+
+        val request = SplitInstallRequest
+            .newBuilder()
+            .addModule("documentscanner")
+            .build()
+
+        val listener =
+            SplitInstallStateUpdatedListener { splitInstallSessionState ->
+                if (splitInstallSessionState.sessionId() == mySessionId) {
+                    when (splitInstallSessionState.status()) {
+                        SplitInstallSessionStatus.INSTALLED -> {
+                            toastAndLog("Dynamic Module installed")
+                            askPermission()
+                        }
+                        SplitInstallSessionStatus.CANCELED -> {
+                            toastAndLog("Dynamic Module cancelled")
+                        }
+                        SplitInstallSessionStatus.CANCELING -> {
+                            toastAndLog("Dynamic Module cancelling")
+                        }
+                        SplitInstallSessionStatus.DOWNLOADED -> {
+                            toastAndLog("Dynamic Module downloaded")
+                        }
+                        SplitInstallSessionStatus.DOWNLOADING -> {
+                            toastAndLog("Dynamic Module downloading")
+                        }
+                        SplitInstallSessionStatus.FAILED -> {
+                            toastAndLog("Dynamic Module failed")
+                        }
+                        SplitInstallSessionStatus.INSTALLING -> {
+                            toastAndLog("Dynamic Module installing")
+                        }
+                        SplitInstallSessionStatus.PENDING -> {
+                            toastAndLog("Dynamic Module pending")
+                        }
+                        SplitInstallSessionStatus.REQUIRES_USER_CONFIRMATION -> {
+                            toastAndLog("Dynamic Module user confirmation")
+                        }
+                        SplitInstallSessionStatus.UNKNOWN -> {
+                            toastAndLog("Dynamic Module unknown")
+                        }
+                    }
+                }
+            }
+
+        splitInstallManager.registerListener(listener)
+
+        splitInstallManager.startInstall(request)
+            .addOnFailureListener { e -> toastAndLog("Exception $e") }
+            .addOnSuccessListener { mySessionId = it }
+    }
+
+    private fun toastAndLog(s: String) {
+        Toast.makeText(this, s, Toast.LENGTH_SHORT).show()
+        Log.v("***********MainActivity", s)
+    }
+
+    private fun askPermission() {
         if (
-            ContextCompat.checkSelfPermission( this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE ) != PackageManager.PERMISSION_GRANTED||
-            ContextCompat.checkSelfPermission( this, android.Manifest.permission.READ_EXTERNAL_STORAGE ) != PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission( this, android.Manifest.permission.CAMERA ) != PackageManager.PERMISSION_GRANTED)
-        {
+            ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.READ_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.CAMERA
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             KotlinPermissions.with(this)
                 .permissions(
                     Manifest.permission.WRITE_EXTERNAL_STORAGE,
                     Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.CAMERA)
+                    Manifest.permission.CAMERA
+                )
                 .onAccepted { permissions ->
                     setView()
                 }
@@ -94,7 +174,11 @@ class MainActivity : AppCompatActivity() {
                     askPermission()
                 }
                 .onForeverDenied { permissions ->
-                    Toast.makeText(MainActivity@this,"You have to grant permissions! Grant them from app settings please.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        MainActivity@ this,
+                        "You have to grant permissions! Grant them from app settings please.",
+                        Toast.LENGTH_LONG
+                    ).show()
                     finish()
                 }
                 .ask()
@@ -103,7 +187,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun setView() {
+    private fun setView() {
         btnPick.setOnClickListener(View.OnClickListener {
             val builder = AlertDialog.Builder(this@MainActivity)
             builder.setTitle("Image Chooser")
