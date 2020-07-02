@@ -8,7 +8,6 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:dist="http://schemas.android.com/apk/distribution"
     package="com.h4rz.documentscanner">
 
@@ -17,8 +16,8 @@
 
     <dist:module
         dist:onDemand="true"
-        dist:title="DocumentScanner">
-        <dist:fusing include="true" />
+        dist:title="@string/documentscanner">
+        <dist:fusing dist:include="true" />
     </dist:module>
 
     <application>

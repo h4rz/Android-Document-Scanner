@@ -17,7 +17,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.google.android.play.core.splitinstall.SplitInstallManager
 import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
 import com.google.android.play.core.splitinstall.SplitInstallRequest
 import com.google.android.play.core.splitinstall.SplitInstallStateUpdatedListener
@@ -30,7 +29,6 @@ class MainActivity : AppCompatActivity() {
     lateinit var btnPick: Button
     lateinit var imgBitmap: ImageView
     lateinit var mCurrentPhotoPath: String
-    private lateinit var manager: SplitInstallManager
     var mySessionId = 0
 
     val GALLERY_INTENT_REQUEST_CODE = 1111
@@ -79,7 +77,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        manager = SplitInstallManagerFactory.create(this)
         btnPick = findViewById(R.id.btnPick)
         imgBitmap = findViewById(R.id.imgBitmap)
         mCurrentPhotoPath = ""
@@ -88,8 +85,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun installModule() {
+        //val splitInstallManager = FakeSplitInstallManagerFactory.create(this, getExternalFilesDir("local_testing"))
         val splitInstallManager = SplitInstallManagerFactory.create(this)
-
         val request = SplitInstallRequest
             .newBuilder()
             .addModule("documentscanner")
